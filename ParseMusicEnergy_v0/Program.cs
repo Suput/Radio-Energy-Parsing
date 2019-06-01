@@ -1,14 +1,16 @@
 ﻿using NAudio.Wave;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ParseMusicEnergy_v0
 {
     class Program
-    {        
+    {
         static async Task Main(string[] args)
         {
             try
@@ -44,16 +46,16 @@ namespace ParseMusicEnergy_v0
         {
             try
             {
-                string response = await new HttpClient().GetStringAsync("http://www.energyfm.ru/");
+                string response = await new HttpClient().GetStringAsync("https://www.energyfm.ru/");
                 Console.WriteLine("(1/5) -- Energy html getted");
-                string url = System.Text.RegularExpressions.Regex.Match(response, "data-playlist=\"([^\"]+)\"").Groups[1].Value;
+                string url = Regex.Match(response, "data-playlist=\"([^\"]+)\"").Groups[1].Value;
                 Console.WriteLine("(2/5) -- Audio tag found");
                 response = await new HttpClient().GetStringAsync(url);
-                Console.WriteLine("(3/5) -- RootObject getted");
-                RootObject root = Newtonsoft.Json.JsonConvert.DeserializeObject<RootObject>(response);
-                Console.WriteLine("(4/5) -- RootObject converted");
+                Console.WriteLine("(3/5) -- Playlists getted");
+                RootObject root = JsonConvert.DeserializeObject<RootObject>(response);
+                Console.WriteLine("(4/5) -- Playlists converted");
                 url = (root.playlist.Where(p => p.file[9] == '7').SingleOrDefault()).file;
-                Console.WriteLine("(5/5) -- ic7 url found");
+                Console.WriteLine("(5/5) -- ic7 url found (exaclty the music)");
 
                 return url;
             }
